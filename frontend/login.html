@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Log in - Injury Risk Radar</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="container">
+      <a href="index.html">← Back</a>
+      <section class="card">
+        <h2>Log in</h2>
+        <div id="login-alert" class="alert"></div>
+        <form id="login-form">
+          <label for="email">Email</label>
+          <input type="email" name="email" id="email" required />
+
+          <label for="password">Password</label>
+          <input type="password" name="password" id="password" required />
+
+          <label for="api-base">API base URL</label>
+          <input type="text" name="api-base" id="api-base" />
+
+          <button class="button primary" type="submit">Log in</button>
+        </form>
+      </section>
+    </main>
+    <script src="app.js"></script>
+  </body>
+</html>

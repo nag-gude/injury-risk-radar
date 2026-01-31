@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard - Injury Risk Radar</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  </head>
+  <body>
+    <main class="container" id="dashboard">
+      <header>
+        <h1>Dashboard</h1>
+        <button class="button secondary" id="logout">Log out</button>
+      </header>
+
+      <div id="dashboard-alert" class="alert"></div>
+
+      <section class="card">
+        <h2>Today's risk summary</h2>
+        <div class="grid">
+          <div class="kpi">
+            <h3>Risk level</h3>
+            <p id="risk-level">-</p>
+          </div>
+          <div class="kpi">
+            <h3>Risk score</h3>
+            <p id="risk-score">-</p>
+          </div>
+          <div class="kpi">
+            <h3>Load ratio</h3>
+            <p id="load-ratio">-</p>
+          </div>
+          <div class="kpi">
+            <h3>Fatigue score</h3>
+            <p id="fatigue-score">-</p>
+          </div>
+        </div>
+        <h3>Recommendations</h3>
+        <ul id="recommendations"></ul>
+      </section>
+
+      <section class="card">
+        <h2>Log today's training</h2>
+        <div id="log-alert" class="alert"></div>
+        <form id="log-form">
+          <label for="log_date">Date</label>
+          <input type="date" name="log_date" id="log_date" required />
+
+          <label for="training_duration_min">Training duration (min)</label>
+          <input
+            type="number"
+            name="training_duration_min"
+            id="training_duration_min"
+            min="0"
+            required
+          />
+
+          <label for="training_intensity">Training intensity (1-10)</label>
+          <input
+            type="number"
+            name="training_intensity"
+            id="training_intensity"
+            min="1"
+            max="10"
+            required
+          />
+
+          <label for="soreness">Muscle soreness (1-10)</label>
+          <input
+            type="number"
+            name="soreness"
+            id="soreness"
+            min="1"
+            max="10"
+            required
+          />
+
+          <label for="sleep_quality">Sleep quality (1-10)</label>
+          <input
+            type="number"
+            name="sleep_quality"
+            id="sleep_quality"
+            min="1"
+            max="10"
+            required
+          />
+
+          <label>
+            <input type="checkbox" name="rest_day" id="rest_day" />
+            Rest day
+          </label>
+
+          <button class="button primary" type="submit">Save log</button>
+        </form>
+      </section>
+
+      <section class="card">
+        <h2>Training load trend</h2>
+        <canvas id="loadChart" height="120"></canvas>
+      </section>
+
+      <section class="card">
+        <h2>Recent logs</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Duration</th>
+              <th>Intensity</th>
+              <th>Soreness</th>
+              <th>Sleep</th>
+              <th>Load</th>
+            </tr>
+          </thead>
+          <tbody id="log-table"></tbody>
+        </table>
+      </section>
+
+      <p class="disclaimer">
+        This tool provides general injury prevention guidance and is not a
+        medical device.
+      </p>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>
