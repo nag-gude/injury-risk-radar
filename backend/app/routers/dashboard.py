@@ -2,10 +2,10 @@ from datetime import date, datetime
 
 from fastapi import APIRouter
 
-from ..auth import get_current_user
-from ..db import list_logs as list_user_logs
-from ..models import DailyLog, DashboardSummary
-from ..risk import summarize_risk
+from app.auth import get_current_user
+from app.db import list_logs as list_user_logs
+from app.models import DailyLog, DashboardSummary
+from app.risk import summarize_risk
 
 router = APIRouter(prefix="/dashboard", tags=["dashboard"])
 

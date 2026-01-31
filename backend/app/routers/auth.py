@@ -3,9 +3,9 @@ import uuid
 
 from fastapi import APIRouter, HTTPException, status
 
-from ..auth import create_access_token, get_current_user, hash_password, verify_password
-from ..db import create_user, get_user_by_email
-from ..models import LoginRequest, TokenResponse, UserCreate, UserProfile
+from app.auth import create_access_token, get_current_user, hash_password, verify_password
+from app.db import create_user, get_user_by_email
+from app.models import LoginRequest, TokenResponse, UserCreate, UserProfile
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -16,14 +16,19 @@ def register_user(payload: UserCreate) -> UserProfile:
     if existing:
         raise HTTPException(status_code=400, detail="Email already registered")
 
+    try:
+        hashed_password = hash_password(payload.password)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
     user_data = {
         "id": str(uuid.uuid4()),
         "email": payload.email,
-        "hashed_password": hash_password(payload.password),
+        "hashed_password": hashed_password,
         "role": payload.role,
         "sport": payload.sport,
         "age_group": payload.age_group,
-        "created_at": datetime.now(timezone.utc),
+        "created_at": datetime.now(timezone.utc).isoformat(),
     }
     stored = create_user(user_data)
     if not stored:

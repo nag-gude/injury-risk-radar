@@ -4,9 +4,9 @@ import uuid
 
 from fastapi import APIRouter, Header, HTTPException
 
-from ..auth import hash_password
-from ..config import settings
-from ..db import create_log, create_user, get_user_by_email
+from app.auth import hash_password
+from app.config import settings
+from app.db import create_log, create_user, get_user_by_email
 
 router = APIRouter(prefix="/seed", tags=["seed"])
 

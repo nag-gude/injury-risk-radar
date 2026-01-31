@@ -3,10 +3,10 @@ import uuid
 
 from fastapi import APIRouter, HTTPException, status
 
-from ..auth import get_current_user
-from ..db import create_log, get_log_by_date, list_logs as list_user_logs
-from ..models import DailyLog, DailyLogCreate
-from ..risk import calculate_training_load
+from app.auth import get_current_user
+from app.db import create_log, get_log_by_date, list_logs as list_user_logs
+from app.models import DailyLog, DailyLogCreate
+from app.risk import calculate_training_load
 
 router = APIRouter(prefix="/logs", tags=["logs"])
 
