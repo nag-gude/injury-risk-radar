@@ -147,7 +147,10 @@ async function loadDashboard() {
       const labels = data.logs.map((log) => log.log_date);
       const loads = data.logs.map((log) => log.training_load);
       const ctx = document.getElementById("loadChart").getContext("2d");
-      new Chart(ctx, {
+      if (window.loadChartInstance) {
+        window.loadChartInstance.destroy();
+      }
+      window.loadChartInstance = new Chart(ctx, {
         type: "line",
         data: {
           labels,
@@ -173,13 +176,21 @@ async function handleLogSubmit(event) {
   event.preventDefault();
   hideAlert("log-alert");
 
+  const isRestDay = event.target.rest_day.checked;
+  const trainingDuration = isRestDay
+    ? 0
+    : Number(event.target.training_duration_min.value);
+  const trainingIntensity = isRestDay
+    ? 1
+    : Number(event.target.training_intensity.value);
+
   const payload = {
     log_date: event.target.log_date.value,
-    training_duration_min: Number(event.target.training_duration_min.value),
-    training_intensity: Number(event.target.training_intensity.value),
+    training_duration_min: trainingDuration,
+    training_intensity: trainingIntensity,
     soreness: Number(event.target.soreness.value),
     sleep_quality: Number(event.target.sleep_quality.value),
-    rest_day: event.target.rest_day.checked,
+    rest_day: isRestDay,
   };
 
   try {
@@ -189,6 +200,11 @@ async function handleLogSubmit(event) {
     });
     showAlert("log-alert", "Log saved successfully.", true);
     await loadDashboard();
+    event.target.reset();
+    const dateInput = event.target.log_date;
+    if (dateInput) {
+      dateInput.valueAsDate = new Date();
+    }
   } catch (error) {
     showAlert("log-alert", error.message);
   }
@@ -220,6 +236,24 @@ document.addEventListener("DOMContentLoaded", () => {
   const logForm = document.getElementById("log-form");
   if (logForm) {
     logForm.addEventListener("submit", handleLogSubmit);
+    const restDayToggle = logForm.querySelector("#rest_day");
+    const durationInput = logForm.querySelector("#training_duration_min");
+    const intensityInput = logForm.querySelector("#training_intensity");
+    if (restDayToggle && durationInput && intensityInput) {
+      const toggleInputs = () => {
+        const isRestDay = restDayToggle.checked;
+        durationInput.required = !isRestDay;
+        intensityInput.required = !isRestDay;
+        durationInput.disabled = isRestDay;
+        intensityInput.disabled = isRestDay;
+        if (isRestDay) {
+          durationInput.value = "0";
+          intensityInput.value = "1";
+        }
+      };
+      restDayToggle.addEventListener("change", toggleInputs);
+      toggleInputs();
+    }
   }
 
   const logoutButton = document.getElementById("logout");
