@@ -1,55 +1,54 @@
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
+import uuid
 
-from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
-from jose import JWTError, jwt
-from passlib.context import CryptContext
+from fastapi import APIRouter, HTTPException, status
 
-from .config import settings
-from .db import get_user_by_id
+from ..auth import create_access_token, get_current_user, hash_password, verify_password
+from ..db import create_user, get_user_by_email
+from ..models import LoginRequest, TokenResponse, UserCreate, UserProfile
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-MAX_BCRYPT_BYTES = 72
+router = APIRouter(prefix="/auth", tags=["auth"])
 
 
-def hash_password(password: str) -> str:
-    if len(password.encode("utf-8")) > MAX_BCRYPT_BYTES:
-        raise ValueError("Password must be 72 bytes or fewer.")
-    return pwd_context.hash(password)
+@router.post("/register", response_model=UserProfile, status_code=201)
+def register_user(payload: UserCreate) -> UserProfile:
+    existing = get_user_by_email(payload.email)
+    if existing:
+        raise HTTPException(status_code=400, detail="Email already registered")
 
-
-def verify_password(plain_password: str, hashed_password: str) -> bool:
-    if len(plain_password.encode("utf-8")) > MAX_BCRYPT_BYTES:
-        return False
-    return pwd_context.verify(plain_password, hashed_password)
-
-
-def create_access_token(subject: str) -> str:
-    expires_delta = timedelta(minutes=settings.access_token_exp_minutes)
-    expire = datetime.now(timezone.utc) + expires_delta
-    to_encode = {"sub": subject, "exp": expire}
-    return jwt.encode(to_encode, settings.jwt_secret, algorithm=settings.jwt_algorithm)
-
-
-def get_current_user(token: str = Depends(oauth2_scheme)) -> dict:
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
     try:
-        payload = jwt.decode(
-            token, settings.jwt_secret, algorithms=[settings.jwt_algorithm]
-        )
-        user_id: str | None = payload.get("sub")
-        if user_id is None:
-            raise credentials_exception
-    except JWTError as exc:
-        raise credentials_exception from exc
+        hashed_password = hash_password(payload.password)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
-    user = get_user_by_id(user_id)
+    user_data = {
+        "id": str(uuid.uuid4()),
+        "email": payload.email,
+        "hashed_password": hashed_password,
+        "role": payload.role,
+        "sport": payload.sport,
+        "age_group": payload.age_group,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    }
+    stored = create_user(user_data)
+    if not stored:
+        raise HTTPException(status_code=400, detail="Email already registered")
+    return UserProfile(**user_data)
+
+
+@router.post("/login", response_model=TokenResponse)
+def login_user(payload: LoginRequest) -> TokenResponse:
+    user = get_user_by_email(payload.email)
     if not user:
-        raise credentials_exception
+        raise HTTPException(status_code=401, detail="Invalid credentials")
 
-    return user
+    if not verify_password(payload.password, user.get("hashed_password", "")):
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+
+    token = create_access_token(user["id"])
+    return TokenResponse(access_token=token)
+
+
+@router.get("/me", response_model=UserProfile)
+def get_profile(current_user: dict = get_current_user) -> UserProfile:
+    return UserProfile(**current_user)
