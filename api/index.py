@@ -2,9 +2,10 @@ import os
 import sys
 
 ROOT_DIR = os.path.dirname(os.path.dirname(__file__))
-sys.path.append(ROOT_DIR)
+BACKEND_DIR = os.path.join(ROOT_DIR, "backend")
+sys.path.append(BACKEND_DIR)
 
-from backend.app.main import app as _app  # noqa: E402
+from app.main import app as _app  # noqa: E402
 
 
 async def app(scope, receive, send):
