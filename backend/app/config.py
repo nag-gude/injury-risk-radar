@@ -6,7 +6,7 @@ class Settings(BaseSettings):
     jwt_secret: str = "change-me"
     jwt_algorithm: str = "HS256"
     access_token_exp_minutes: int = 60 * 24 * 7
-    firestore_project: str | None = None
+    seed_token: str | None = None
 
 
 settings = Settings()

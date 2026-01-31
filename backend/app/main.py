@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .config import settings
-from .routers import auth, dashboard, logs, recommendations
+from .routers import auth, dashboard, logs, recommendations, seed
 
 app = FastAPI(title=settings.app_name)
 
@@ -18,6 +18,7 @@ app.include_router(auth.router)
 app.include_router(logs.router)
 app.include_router(dashboard.router)
 app.include_router(recommendations.router)
+app.include_router(seed.router)
 
 
 @app.get("/health")

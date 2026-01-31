@@ -6,7 +6,7 @@ from jose import JWTError, jwt
 from passlib.context import CryptContext
 
 from .config import settings
-from .db import get_client
+from .db import get_user_by_id
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -43,9 +43,8 @@ def get_current_user(token: str = Depends(oauth2_scheme)) -> dict:
     except JWTError as exc:
         raise credentials_exception from exc
 
-    db = get_client()
-    user_doc = db.collection("users").document(user_id).get()
-    if not user_doc.exists:
+    user = get_user_by_id(user_id)
+    if not user:
         raise credentials_exception
 
-    return user_doc.to_dict()
+    return user
