@@ -1,6 +1,6 @@
 from datetime import date, datetime
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 
 from app.auth import get_current_user
 from app.db import list_logs as list_user_logs
@@ -20,7 +20,7 @@ def _normalize_log(log: dict) -> dict:
 
 
 @router.get("", response_model=DashboardSummary)
-def get_dashboard(current_user: dict = get_current_user) -> DashboardSummary:
+def get_dashboard(current_user: dict = Depends(get_current_user)) -> DashboardSummary:
     logs = [_normalize_log(log) for log in list_user_logs(current_user["id"])]
     logs.sort(key=lambda item: item["log_date"])
 

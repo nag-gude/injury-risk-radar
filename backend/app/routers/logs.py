@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 import uuid
 
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.auth import get_current_user
 from app.db import create_log, get_log_by_date, list_logs as list_user_logs
@@ -13,7 +13,7 @@ router = APIRouter(prefix="/logs", tags=["logs"])
 
 @router.post("", response_model=DailyLog, status_code=201)
 def create_log(
-    payload: DailyLogCreate, current_user: dict = get_current_user
+    payload: DailyLogCreate, current_user: dict = Depends(get_current_user)
 ) -> DailyLog:
     log_date_str = payload.log_date.isoformat()
     existing = get_log_by_date(current_user["id"], log_date_str)
@@ -42,7 +42,7 @@ def create_log(
 
 
 @router.get("", response_model=list[DailyLog])
-def list_logs(current_user: dict = get_current_user) -> list[DailyLog]:
+def list_logs(current_user: dict = Depends(get_current_user)) -> list[DailyLog]:
     logs = list_user_logs(current_user["id"])
     logs.sort(key=lambda item: item["log_date"])
     return [DailyLog(**log) for log in logs]

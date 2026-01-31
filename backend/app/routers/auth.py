@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 import uuid
 
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.auth import create_access_token, get_current_user, hash_password, verify_password
 from app.db import create_user, get_user_by_email
@@ -50,5 +50,5 @@ def login_user(payload: LoginRequest) -> TokenResponse:
 
 
 @router.get("/me", response_model=UserProfile)
-def get_profile(current_user: dict = get_current_user) -> UserProfile:
+def get_profile(current_user: dict = Depends(get_current_user)) -> UserProfile:
     return UserProfile(**current_user)
