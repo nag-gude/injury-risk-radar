@@ -1,6 +1,6 @@
 from datetime import date, timedelta
 
-from .models import RiskSummary
+from app.models import RiskSummary
 
 
 def calculate_training_load(duration_min: int, intensity: int) -> float:
