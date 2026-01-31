@@ -4,7 +4,7 @@ import uuid
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.auth import get_current_user
-from app.db import create_log, get_log_by_date, list_logs as list_user_logs
+from app.db import create_log as create_log_entry, get_log_by_date, list_logs as list_user_logs
 from app.models import DailyLog, DailyLogCreate
 from app.risk import calculate_training_load
 
@@ -35,7 +35,7 @@ def create_log(
         "training_load": training_load,
         "created_at": datetime.now(timezone.utc).isoformat(),
     }
-    stored = create_log(log_data)
+    stored = create_log_entry(log_data)
     if not stored:
         raise HTTPException(status_code=400, detail="Log for date already exists")
     return DailyLog(**log_data)
